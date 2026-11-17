@@ -1,0 +1,212 @@
+
+@using System.Web.Mvc
+@using System.Web.Mvc.Html
+@inherits System.Web.Mvc.WebViewPage<List<MiniStore.Models.Order>>
+
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Đơn hàng của tôi";
+
+    string[] statuses = {
+        "Chờ thanh toán",
+        "Đang xử lý",
+        "Đang vận chuyển",
+        "Đã giao",
+        "Đã hủy"
+    };
+
+    string currentStatus = ViewBag.Status ?? "All";
+}
+
+<style>
+    .order-page {
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 3px 15px rgba(0,0,0,.06);
+    }
+
+    .order-title {
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .order-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 20px 0;
+    }
+
+        .order-tabs a {
+            padding: 9px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            color: #333;
+            text-decoration: none;
+        }
+
+            .order-tabs a.active {
+                background: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+    .order-card {
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .order-status {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .order-total {
+        color: #e53935;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .empty-order {
+        text-align: center;
+        padding: 50px 10px;
+    }
+</style>
+
+<div class="order-page">
+
+    <h2 class="order-title">ĐƠN HÀNG CỦA TÔI</h2>
+
+    @using (Html.BeginForm("MyOrder", "Order", FormMethod.Get))
+    {
+        <div class="input-group mb-3">
+            <input type="text"
+                   name="searchTerm"
+                   value="@ViewBag.SearchTerm"
+                   class="form-control"
+                   placeholder="Nhập mã đơn hàng hoặc tên sản phẩm..." />
+
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">
+                    Tìm kiếm
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="order-tabs">
+        <a class="@(currentStatus == "All" ? "active" : "")"
+           href="@Url.Action("MyOrder", new { status = "All", searchTerm = ViewBag.SearchTerm })">
+            Tất cả đơn
+        </a>
+
+        @foreach (var s in statuses)
+        {
+            <a class="@(currentStatus == s ? "active" : "")"
+               href="@Url.Action("MyOrder", new { status = s, searchTerm = ViewBag.SearchTerm })">
+                @s
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-order">
+            <h4>BẠN CHƯA CÓ ĐƠN HÀNG NÀO</h4>
+            <p>Hãy đặt đơn ngay để xem lịch sử mua hàng của bạn.</p>
+
+            <a href="@Url.Action("Index", "Home")"
+               class="btn btn-primary">
+                Mua sắm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        foreach (var order in Model)
+        {
+            <div class="order-card">
+
+                <div class="d-flex justify-content-between flex-wrap">
+                    <h5>Đơn hàng #@order.OrderID</h5>
+
+                    <span class="order-status">
+                        @order.PaymentStatus
+                    </span>
+                </div>
+
+                <hr />
+
+                <p>
+                    <strong>Ngày đặt:</strong>
+                    @order.OrderDate.ToString("dd/MM/yyyy")
+                </p>
+
+                <p>
+                    <strong>Sản phẩm:</strong>
+                    @foreach (var item in order.OrderDetails)
+                    {
+                        <span>
+                            @item.Product.ProductName
+                            (x@item.Quantity)
+                        </span>
+                        <br />
+                    }
+                </p>
+
+                <p>
+                    <strong>Địa chỉ:</strong>
+                    @order.AddressDelivery
+                </p>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                    <span class="order-total">
+                        @order.TotalAmount.ToString("N0") đ
+                    </span>
+
+                    <div class="mt-2">
+
+                        @using (Html.BeginForm("BuyAgain", "Order",
+                            new { id = order.OrderID }, FormMethod.Post,
+                            new { style = "display:inline-block" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-warning btn-sm">
+                                MUA LẠI
+                            </button>
+                        }
+
+                    <a href="@Url.Action("DetailedOrder", "Order",
+                         new { id = order.OrderID })"
+                       class="btn btn-primary">
+                        XEM CHI TIẾT
+                    </a>
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        if (Model.Count >= 2 && !(ViewBag.XemThem ?? false))
+        {
+            <div class="text-center">
+                <a class="btn btn-outline-primary"
+                   href="@Url.Action("MyOrder", new {
+                       status = currentStatus,
+                       searchTerm = ViewBag.SearchTerm,
+                       xemThem = true
+                   })">
+                    Xem thêm
+                </a>
+            </div>
+        }
+    }
+
+</div>

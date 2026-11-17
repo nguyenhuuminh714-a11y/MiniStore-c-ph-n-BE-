@@ -1,0 +1,18 @@
+@model IEnumerable<MiniStore.Models.Product>
+<h3 class="mt-5 mb-3">Có thể bạn cũng thích</h3>
+<div class="row">
+@foreach (var product in Model)
+{
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card h-100 product-card">
+            <img class="card-img-top product-image" src="@Url.Content(string.IsNullOrWhiteSpace(product.ProductImage) ? "~/Content/no-image.svg" : product.ProductImage)" alt="@product.ProductName" />
+            <div class="card-body">
+                <small class="text-muted">@(product.Category == null ? "" : product.Category.CategoryName)</small>
+                <h6>@product.ProductName</h6>
+                <p class="price">@product.ProductPrice.ToString("N0") đ</p>
+                <a class="btn btn-sm btn-outline-primary" href="@Url.Action("ProductDetail", "Home", new { id = product.ProductID })">Xem sản phẩm</a>
+            </div>
+        </div>
+    </div>
+}
+</div>

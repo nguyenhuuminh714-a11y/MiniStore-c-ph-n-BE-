@@ -1,0 +1,10 @@
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.cache
+packages/
+
+[Bb]in/
+[Oo]bj/

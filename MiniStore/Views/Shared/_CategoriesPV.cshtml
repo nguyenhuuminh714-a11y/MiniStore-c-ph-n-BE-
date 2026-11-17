@@ -1,0 +1,10 @@
+@model IEnumerable<MiniStore.Models.Category>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-toggle="dropdown">Danh mục</a>
+    <div class="dropdown-menu" aria-labelledby="categoryDropdown">
+        @foreach (var category in Model)
+        {
+            <a class="dropdown-item" href="@Url.Action("ProductList", "Home", new { categoryId = category.CategoryID })">@category.CategoryName</a>
+        }
+    </div>
+</li>
